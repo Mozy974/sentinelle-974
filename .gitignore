@@ -6,3 +6,4 @@ __pycache__/
 report.md
 *.db
 .pytest_cache/
+*.pdf

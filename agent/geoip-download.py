@@ -51,7 +51,11 @@ def main() -> int:
         if not mmdb:
             print("ERREUR: .mmdb introuvable dans l'archive", file=sys.stderr)
             return 1
-        with tar.open(mmdb) as src, open(args.out, "wb") as dst:
+        src = tar.extractfile(mmdb)
+        if src is None:
+            print("ERREUR: impossible d'extraire le .mmdb", file=sys.stderr)
+            return 1
+        with open(args.out, "wb") as dst:
             dst.write(src.read())
 
     os.remove(tmp)

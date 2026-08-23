@@ -234,9 +234,29 @@ def dashboard(request: Request, db: Session = Depends(get_db)) -> HTMLResponse:
 # --------------------------------------------------------------------------- #
 # Rapport PDF
 # --------------------------------------------------------------------------- #
+_SEV_ORDER = {"CRIT": 0, "HIGH": 1, "MED": 2, "LOW": 3, "INFO": 4}
+
+
+def _filter_by_severity(findings: list, min_severity: str | None) -> list:
+    """Garde les findings de sévérité >= min_severity (CRIT > HIGH > MED > LOW > INFO)."""
+    if not min_severity:
+        return findings
+    threshold = _SEV_ORDER.get(min_severity.upper())
+    if threshold is None:
+        return findings
+    return [f for f in findings if _SEV_ORDER.get(f.severity, 4) <= threshold]
+
+
 @app.get("/report.pdf")
-def report_pdf(db: Session = Depends(get_db)) -> Response:
+def report_pdf(
+    severity: str | None = Query(default=None),
+    limit: int | None = Query(default=None, ge=1),
+    db: Session = Depends(get_db),
+) -> Response:
     findings = db.scalars(select(models.Finding).order_by(models.Finding.created_at.desc())).all()
+    findings = _filter_by_severity(findings, severity)
+    if limit:
+        findings = findings[:limit]
     score = db.scalars(select(models.Score).order_by(models.Score.computed_at.desc()).limit(1)).first()
     flows = db.scalars(select(models.SovereigntyFlow).order_by(models.SovereigntyFlow.observed_at.desc())).all()
     pdf_bytes = build_pdf(settings.sentinelle_host, findings, score, flows)

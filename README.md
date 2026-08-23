@@ -1,5 +1,7 @@
 # Sentinelle 974
 
+[![CI](https://github.com/Mozy974/sentinelle-974/actions/workflows/ci.yml/badge.svg)](https://github.com/Mozy974/sentinelle-974/actions)
+
 Plateforme **self-hosted** de souveraineté des données + posture cyber, pensée pour
 les PME et collectivités de La Réunion. **Aucune donnée métier ne quitte la machine
 (ou le LAN).**

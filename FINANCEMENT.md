@@ -114,3 +114,50 @@ mairie ou un cabinet médical.
    lettre d'intention.
 4. Finaliser le **budget** avec devis réels.
 5. Déposer le dossier.
+
+---
+
+## 10. Dispositifs concrets (à vérifier — liste indicative)
+
+⚠️ **Les intitulés, montants et conditions évoluent. Vérifier chaque lien avant dépôt.**
+
+### Région Réunion — Contrat de filière numérique 2026-2028
+- **Cible** : PME, collectivités, associations du numérique réunionnais.
+- **Axe** : cybersécurité, souveraineté des données, cloud de confiance.
+- **Action** : contacter le service « Filière Numérique » de la Région Réunion
+  (ou la Technopole de La Réunion) pour le règlement exact et les guichets.
+- **Doc** : https://www.regionreunion.com (rechercher « filière numérique »).
+
+### ADIR — Association pour le Développement Industriel de La Réunion
+- **Cible** : porteurs de projets innovants (dont le numérique).
+- **Action** : accompagnement au montage du dossier + mise en relation financeurs.
+- **Doc** : https://www.adir.re
+
+### French Tech La Réunion
+- **Cible** : startups et scale-ups (label, réseau, mentorat).
+- **Action** : intégrer le réseau pour la visibilité et l'accès aux dispositifs.
+- **Doc** : https://lafrenchtech-lareunion.com
+
+### Bpifrance
+- **Dispositifs possibles** :
+  - **Bourse French Tech** (subvention, jusqu'à ~30-90 k€ selon les éditions).
+  - **Prêt d'honneur** via Initiative Réunion / Réseau Entreprendre.
+  - **Aide à l'innovation** (subvention + avance récupérable).
+- **Doc** : https://www.bpifrance.fr
+
+### FEDER / Europe (2021-2027)
+- **Cible** : projets de transformation numérique des PME et collectivités.
+- **Action** : via la Région Réunion (autorité de gestion FEDER).
+- **Doc** : https://www.regionreunion.com (rubrique « fonds européens »).
+
+### Checklist de dépôt (selon le dispositif)
+- [ ] Statut juridique à jour (EI / micro-entreprise / SASU).
+- [ ] RIB + attestations fiscales et sociales.
+- [ ] Business plan court (PITCH.md + FINANCEMENT.md).
+- [ ] Devis matériel (mini-PC, licences).
+- [ ] Lettre d'intention d'un client pilote.
+- [ ] Démo fonctionnelle (dashboard + rapport PDF + capture).
+
+> **Conseil** : commencer par l'ADIR ou la French Tech La Réunion — ce sont les
+> portes d'entrée locales qui orientent vers le bon guichet et aident à la
+> rédaction du dossier.

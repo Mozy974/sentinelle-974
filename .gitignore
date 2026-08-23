@@ -5,3 +5,4 @@ __pycache__/
 .venv/
 report.md
 *.db
+.pytest_cache/

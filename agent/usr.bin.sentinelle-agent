@@ -1,0 +1,62 @@
+# ==============================================================================
+# Sentinelle 974 — Profile AppArmor de l'agent (mode complain au départ)
+#
+# Installation :
+#   sudo cp agent/usr.bin.sentinelle-agent /etc/apparmor.d/
+#   sudo apparmor_parser -r /etc/apparmor.d/usr.bin.sentinelle-agent
+#   sudo aa-complain /usr/local/bin/sentinelle-agent   # observer d'abord
+#   sudo aa-enforce /usr/local/bin/sentinelle-agent   # puis durcir
+#
+# Ce profile limite l'agent à la lecture des infos système + écriture des
+# rapports + POST HTTP vers l'API locale. Aucun accès réseau arbitraire.
+# ==============================================================================
+
+#include <tunables/global>
+
+profile sentinelle-agent /usr/local/bin/sentinelle-agent flags=(attach_disconnected) {
+  #include <abstractions/base>
+  #include <abstractions/bash>
+  #include <abstractions/consoles>
+
+  # Lecture des infos système (audit)
+  /etc/os-release r,
+  /etc/passwd r,
+  /etc/group r,
+  /etc/ssh/sshd_config r,
+  /etc/sudoers r,
+  /etc/sudoers.d/** r,
+  /var/log/dpkg.log r,
+  /var/run/reboot-required r,
+  /proc/** r,
+  /sys/** r,
+  /run/systemd/** r,
+
+  # Binaires système nécessaires
+  /usr/bin/** rix,
+  /usr/sbin/** rix,
+  /bin/** rix,
+  /sbin/** rix,
+
+  # Écriture des rapports d'audit
+  /tmp/debian-security-audit/reports/** rw,
+  /var/log/debian-security-audit/reports/** rw,
+
+  # Accès réseau : uniquement vers l'API locale (POST /ingest, /flows)
+  network inet stream,
+  network inet6 stream,
+
+  # Ollama local (lecture des modèles)
+  network inet stream,
+
+  # Bibliothèques
+  /usr/lib/** mr,
+  /lib/** mr,
+  /lib64/** mr,
+
+  # Divers
+  /dev/null rw,
+  /dev/urandom r,
+  /etc/localtime r,
+  /etc/hostname r,
+  /etc/hosts r,
+}

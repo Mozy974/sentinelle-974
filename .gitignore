@@ -1,0 +1,7 @@
+# Sentinelle 974 — ignore
+.env
+__pycache__/
+*.pyc
+.venv/
+report.md
+*.db

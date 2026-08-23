@@ -1,0 +1,67 @@
+# ==============================================================================
+# Sentinelle 974 — docker-compose.yml
+# Plateforme self-hosted de souveraineté des données + posture cyber (PME 974)
+# Tout reste local : volumes, pas de cloud, bind 127.0.0.1 par défaut.
+# ==============================================================================
+
+name: sentinelle-974
+
+services:
+  api:
+    build: ./api
+    container_name: sentinelle-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg2://sentinelle:${POSTGRES_PASSWORD:-sentinelle}@db:5432/sentinelle
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      SENTINELLE_HOST: ${SENTINELLE_HOST:-localhost}
+      SENTINELLE_LLM_MODEL: ${SENTINELLE_LLM_MODEL:-OpenLLM-France/Luciole-Instruct-1.1:1B}
+    ports:
+      - "127.0.0.1:${API_PORT:-8090}:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  db:
+    image: postgres:15-alpine
+    container_name: sentinelle-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sentinelle
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sentinelle}
+      POSTGRES_DB: sentinelle
+    ports:
+      - "127.0.0.1:${DB_PORT:-5433}:5432"
+    volumes:
+      - sentinelle_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinelle -d sentinelle"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: sentinelle-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.listen-address=0.0.0.0:9090
+    ports:
+      - "127.0.0.1:${PROM_PORT:-9091}:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - sentinelle_promdata:/prometheus
+
+volumes:
+  sentinelle_pgdata:
+  sentinelle_promdata:

@@ -1,0 +1,18 @@
+# ==============================================================================
+# Sentinelle 974 — cron (audit quotidien + collecte souveraineté)
+# Installation :
+#   sudo cp agent/sentinelle-cron /etc/cron.d/sentinelle
+#   sudo chmod 644 /etc/cron.d/sentinelle
+# ==============================================================================
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Audit complet + inventaire, tous les jours à 06:30 (heure locale)
+30 6 * * * root /usr/local/bin/sentinelle-agent --api http://127.0.0.1:8090 >> /var/log/sentinelle-agent.log 2>&1
+
+# Scan CVE (Debian tracker + NVD + APT), tous les jours à 05:00
+0 5 * * * root /usr/local/bin/cve-collect --quiet --api http://127.0.0.1:8090 >> /var/log/sentinelle-cve.log 2>&1
+
+# Collecte souveraineté (flux sortants), toutes les heures
+0 * * * * root /usr/local/bin/sovereignty-collect --api http://127.0.0.1:8090 >> /var/log/sentinelle-sovereignty.log 2>&1

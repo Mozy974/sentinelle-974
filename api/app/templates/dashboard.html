@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sentinelle 974 — Dashboard</title>
+  <!-- Auto-refresh local (aucun CDN, aucune dépendance externe) -->
+  <meta http-equiv="refresh" content="60">
+  <style>
+    :root {
+      --bg: #0d1117; --panel: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e;
+      --crit: #f85149; --high: #ffa657; --med: #d29922; --low: #3fb950; --info: #58a6ff;
+      --accent: #2f81f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+           background: var(--bg); color: var(--text); }
+    header { padding: 20px 28px; border-bottom: 1px solid var(--border);
+             display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+    header h1 { margin: 0; font-size: 1.4rem; }
+    header .sub { color: var(--muted); font-size: .85rem; }
+    main { padding: 24px 28px; display: grid; gap: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .card { background: var(--panel); border: 1px solid var(--border);
+            border-radius: 8px; padding: 18px; }
+    .card h2 { margin: 0 0 12px; font-size: 1rem; color: var(--muted);
+               text-transform: uppercase; letter-spacing: .05em; }
+    .score-big { font-size: 3rem; font-weight: 700; }
+    .grade { display: inline-block; padding: 4px 14px; border-radius: 6px;
+             font-weight: 700; font-size: 1.2rem; }
+    .grade-A { background: #1a7f37; } .grade-B { background: #2ea043; }
+    .grade-C { background: #9e6a03; } .grade-D { background: #b35900; }
+    .grade-E { background: #c0392b; } .grade-F { background: #8b0000; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px;
+             font-size: .75rem; font-weight: 600; margin-right: 4px; }
+    .sev-CRIT { background: var(--crit); color: #fff; }
+    .sev-HIGH { background: var(--high); color: #000; }
+    .sev-MED  { background: var(--med); color: #000; }
+    .sev-LOW  { background: var(--low); color: #000; }
+    .sev-INFO { background: var(--info); color: #fff; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; }
+    tr:hover td { background: #1c2128; }
+    .verdict-allow { color: var(--low); } .verdict-warn { color: var(--med); }
+    .verdict-block { color: var(--crit); }
+    .region { font-family: monospace; }
+    .empty { color: var(--muted); font-style: italic; }
+    .bar { height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; margin-top: 6px; }
+    .bar > span { display: block; height: 100%; background: var(--accent); }
+    .kpi { display: flex; gap: 20px; flex-wrap: wrap; }
+    .kpi div { min-width: 90px; }
+    .kpi .n { font-size: 1.6rem; font-weight: 700; }
+    .kpi .l { color: var(--muted); font-size: .75rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🛡️ Sentinelle 974</h1>
+    <span class="sub">Hôte : <strong>{{ host }}</strong> · v{{ version }} · 100% local</span>
+  </header>
+
+  <main>
+    <!-- Score de conformité -->
+    <div class="grid">
+      <div class="card">
+        <h2>Score de conformité</h2>
+        {% if score %}
+          <div class="score-big">{{ score.score }}<span style="font-size:1.2rem;color:var(--muted)">/100</span></div>
+          <span class="grade grade-{{ score.grade }}">{{ score.grade }}</span>
+          <div class="bar"><span style="width: {{ score.score }}%"></span></div>
+          <p style="color:var(--muted);font-size:.8rem;margin-top:10px">
+            Calculé le {{ score.computed_at.strftime('%d/%m/%Y %H:%M') }}
+          </p>
+        {% else %}
+          <p class="empty">Aucun score — lancer l'agent souveraineté.</p>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <h2>Findings par sévérité</h2>
+        <div class="kpi">
+          <div><div class="n" style="color:var(--crit)">{{ sev_counts.CRIT }}</div><div class="l">Critiques</div></div>
+          <div><div class="n" style="color:var(--high)">{{ sev_counts.HIGH }}</div><div class="l">Élevés</div></div>
+          <div><div class="n" style="color:var(--med)">{{ sev_counts.MED }}</div><div class="l">Médio</div></div>
+          <div><div class="n" style="color:var(--low)">{{ sev_counts.LOW }}</div><div class="l">Faibles</div></div>
+          <div><div class="n" style="color:var(--info)">{{ sev_counts.INFO }}</div><div class="l">Info</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Flux par région</h2>
+        <div class="kpi">
+          <div><div class="n" style="color:var(--low)">{{ region_counts.get('local', 0) }}</div><div class="l">Local</div></div>
+          <div><div class="n" style="color:var(--low)">{{ region_counts.get('eu', 0) }}</div><div class="l">UE</div></div>
+          <div><div class="n" style="color:var(--med)">{{ region_counts.get('other', 0) + region_counts.get('us', 0) + region_counts.get('cn', 0) + region_counts.get('ru', 0) }}</div><div class="l">Hors UE</div></div>
+          <div><div class="n" style="color:var(--crit)">{{ region_counts.get('cloud_llm', 0) + region_counts.get('telemetry', 0) }}</div><div class="l">LLM cloud / télémétrie</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Findings -->
+    <div class="card">
+      <h2>Findings récents</h2>
+      {% if findings %}
+      <table>
+        <thead><tr><th>Sévérité</th><th>Catégorie</th><th>Titre</th><th>Description</th></tr></thead>
+        <tbody>
+        {% for f in findings %}
+          <tr>
+            <td><span class="badge sev-{{ f.severity }}">{{ f.severity }}</span></td>
+            <td><span class="region">{{ f.category }}</span></td>
+            <td>{{ f.title }}</td>
+            <td style="color:var(--muted)">{{ f.description[:120] }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="empty">Aucun finding.</p>
+      {% endif %}
+    </div>
+
+    <!-- Flux réseau -->
+    <div class="card">
+      <h2>Flux réseau sortants</h2>
+      {% if flows %}
+      <table>
+        <thead><tr><th>Destination</th><th>Port</th><th>Proto</th><th>Région</th><th>Verdict</th><th>Processus</th></tr></thead>
+        <tbody>
+        {% for fl in flows %}
+          <tr>
+            <td class="region">{{ fl.dest_ip }}</td>
+            <td>{{ fl.dest_port }}</td>
+            <td>{{ fl.proto }}</td>
+            <td><span class="region">{{ fl.region }}</span></td>
+            <td><span class="verdict-{{ fl.verdict }}">{{ fl.verdict }}</span></td>
+            <td style="color:var(--muted)">{{ fl.process or '?' }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="empty">Aucun flux observé.</p>
+      {% endif %}
+    </div>
+  </main>
+</body>
+</html>
